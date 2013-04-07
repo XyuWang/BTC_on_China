@@ -1,5 +1,5 @@
 # What's This?
-it show BTC's price at https://btcchina.com/
+It show BTC's price at https://btcchina.com/
 
 Like:
 * Time: 4/8 00:12 Price: 1057.50 +0.49
