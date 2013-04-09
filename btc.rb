@@ -13,6 +13,7 @@ while true
     res = h.request req
     str = res.body.to_s
     begin_num =  str.index('Last BTC Price: </td><td align="center">')
+    next if begin_num == nil
     numstr = str[begin_num+42,12]
     numstr = numstr.delete ","
     numstr = numstr[/\d+.\d+/]
