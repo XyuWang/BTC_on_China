@@ -1,31 +1,66 @@
 # coding: UTF-8
 require "net/http"
 require "net/https"
-url = URI.parse('https://btcchina.com')
-http = Net::HTTP.new(url.host, url.port)
-http.use_ssl = true if url.scheme == 'https'
-
-@price = 0.0 
-
-while true
-  http.start do |h|
-    req = Net::HTTP::Get.new url.request_uri
-    res = h.request req
-    str = res.body.to_s
-    begin_num =  str.index('Last BTC Price: </td><td align="center">')
-    next if begin_num == nil
-    numstr = str[begin_num+42,12]
-    numstr = numstr.delete ","
-    numstr = numstr[/\d+.\d+/]
-    num = numstr.to_f
-    if @price - num != 0
-      printf("Time:%2d/%d %02d:%02d Price: %.2f ",Time.now.month,Time.now.day,Time.now.hour,Time.now.min,num, num - @price )
-      if num- @price > 0 
-        printf "+"
+require 'colorize'
+require 'ruby-debug'
+class Btc
+  def initialize
+    @last_price = 0.0
+    @lowest_price = 10000000.0
+    @highest_price = 0.0
+    @url = URI.parse('https://btcchina.com')
+    @net = Net::HTTP.new(@url.host, @url.port)
+    @net.use_ssl = true if @url.scheme == 'https'
+  end
+  def run
+    while true
+      @net.start do |http|
+        next unless get_price_from_respond 
+        print_line get_line
+        @last_price = @price
       end
-      printf("%.2f\n", num - @price)
-      @price = num
+    end
+  end
+
+  private
+  def get_price_from_respond 
+    respond = @net.request(Net::HTTP::Get.new(@url.request_uri))
+    price_string_index = respond.body.to_s.index('Last BTC Price: </td><td align="center">') + 42
+    return nil if price_string_index == nil
+    price_string = respond.body.to_s[price_string_index,12]
+    price_string = price_string.delete ","
+    numstr = price_string[/\d+.\d+/]
+    @price = numstr.to_f
+    @highest_price = @price  if @price > @highest_price
+    @lowest_price  = @price  if @price < @lowest_price
+    return true
+  end
+  def get_line
+    if @price - @last_price != 0
+      line = ""
+      line += sprintf("Time:%2d/%d %02d:%02d Price: %.2f ",Time.now.month,Time.now.day,Time.now.hour,Time.now.min,@price, @price - @last_price )
+      if @price - @last_price > 0 
+        line += '+' 
+      end
+      line += sprintf("%.2f", @price - @last_price)
+      return line
+    else
+      return nil
+    end
+  end
+  def print_line line
+    return if line == nil or @price == @last_price
+    if @price == @highest_price
+      puts line.red
+    elsif @price == @lowest_price
+      puts line.white
+    elsif @price > @last_price
+      puts line.green
+    else
+      puts line.yellow
     end
   end
 
 end
+
+Btc.new.run

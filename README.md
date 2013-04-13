@@ -7,5 +7,8 @@ Like:
 * Time: 4/8 00:14 Price: 1060.00 +1.01
 
 ## Usage
-Just run    
-* ruby btc.rb
+ 
+* 1. git clone git://github.com/wangxyu/BTC_on_China.git 
+* 2. cd BTC_on_China
+* 3. bundle
+* 4. ruby btc.rb
