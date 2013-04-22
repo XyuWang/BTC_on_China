@@ -15,10 +15,11 @@ class Btc
   def run
     while true
       @net.start do |http|
-        next unless get_price_from_respond 
-        print_line get_line
+        next if get_price_from_respond == nil
+        print_line get_price_line
         @last_price = @price
       end
+      sleep(rand(6))
     end
   end
 
@@ -35,7 +36,7 @@ class Btc
     @lowest_price  = @price  if @price < @lowest_price
     return true
   end
-  def get_line
+  def get_price_line
     if @price - @last_price != 0
       line = ""
       line += sprintf("Time:%2d/%d %02d:%02d Price: %.2f ",Time.now.month,Time.now.day,Time.now.hour,Time.now.min,@price, @price - @last_price )
@@ -48,16 +49,16 @@ class Btc
       return nil
     end
   end
-  def print_line line
-    return if line == nil or @price == @last_price
+  def print_line price_line
+    return if price_line == nil or @price == @last_price
     if @price == @highest_price
-      puts line.red
+      puts price_line.red
     elsif @price == @lowest_price
-      puts line.white
+      puts price_line.white
     elsif @price > @last_price
-      puts line.green
+      puts price_line.green
     else
-      puts line.yellow
+      puts price_line.yellow
     end
   end
 
