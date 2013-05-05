@@ -26,7 +26,12 @@ class Btc
   private
   def get_price_from_respond 
     respond = @net.request(Net::HTTP::Get.new(@url.request_uri))
-    price_string_index = respond.body.to_s.index('Last BTC Price: </td><td align="center">') + 42
+    begin
+      price_string_index = respond.body.to_s.index('Last BTC Price: </td><td align="center">') + 42
+    rescue NoMethodError
+      return nil
+    end
+
     return nil if price_string_index == nil
     price_string = respond.body.to_s[price_string_index,12]
     price_string = price_string.delete ","
